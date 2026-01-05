@@ -1,0 +1,175 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Swords, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+
+export default function ArenaView({ room, onVote }) {
+  const [voted, setVoted] = useState(null);
+  const [showResult, setShowResult] = useState(false);
+  
+  const totalVotes = (room?.arena_votes_a || 0) + (room?.arena_votes_b || 0);
+  const percentA = totalVotes > 0 ? Math.round((room?.arena_votes_a || 0) / totalVotes * 100) : 50;
+  const percentB = 100 - percentA;
+
+  const handleVote = (side) => {
+    if (voted) return;
+    setVoted(side);
+    onVote?.(side);
+    setTimeout(() => setShowResult(true), 500);
+  };
+
+  return (
+    <div className="p-4">
+      {/* VS Header */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <motion.div 
+          className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-full 
+                     flex items-center justify-center shadow-lg shadow-orange-500/30"
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
+          <Swords className="w-7 h-7 text-white" />
+        </motion.div>
+        <div className="text-center">
+          <h2 className="text-white font-bold text-lg">ARENA BATTLE</h2>
+          <p className="text-gray-400 text-sm">{totalVotes} warriors voted</p>
+        </div>
+      </div>
+
+      {/* Battle Cards */}
+      <div className="space-y-4">
+        {/* Option A */}
+        <motion.div
+          className={`
+            relative p-5 rounded-2xl border-2 transition-all cursor-pointer overflow-hidden
+            ${voted === 'a' 
+              ? 'border-cyan-400 bg-cyan-500/10' 
+              : voted === 'b' 
+                ? 'border-gray-700 bg-gray-800/50 opacity-60' 
+                : 'border-gray-700 bg-gray-800/80 hover:border-cyan-400/50'
+            }
+          `}
+          whileHover={!voted ? { scale: 1.02 } : {}}
+          whileTap={!voted ? { scale: 0.98 } : {}}
+          onClick={() => handleVote('a')}
+        >
+          {/* Progress bar background */}
+          {showResult && (
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-transparent"
+              initial={{ width: 0 }}
+              animate={{ width: `${percentA}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          )}
+          
+          <div className="relative flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <ChevronLeft className="w-5 h-5 text-cyan-400" />
+                <span className="text-cyan-400 text-sm font-bold uppercase">Side A</span>
+              </div>
+              <p className="text-white font-medium">{room?.arena_option_a || 'Option A'}</p>
+            </div>
+            
+            {showResult && (
+              <motion.div 
+                className="text-2xl font-bold text-cyan-400"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                {percentA}%
+              </motion.div>
+            )}
+          </div>
+          
+          {voted === 'a' && (
+            <motion.div 
+              className="absolute top-2 right-2"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+            >
+              <Zap className="w-5 h-5 text-cyan-400 fill-cyan-400" />
+            </motion.div>
+          )}
+        </motion.div>
+
+        {/* VS Divider */}
+        <div className="flex items-center justify-center">
+          <motion.div 
+            className="px-4 py-2 bg-gray-800 rounded-full text-gray-400 font-bold"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            VS
+          </motion.div>
+        </div>
+
+        {/* Option B */}
+        <motion.div
+          className={`
+            relative p-5 rounded-2xl border-2 transition-all cursor-pointer overflow-hidden
+            ${voted === 'b' 
+              ? 'border-orange-400 bg-orange-500/10' 
+              : voted === 'a' 
+                ? 'border-gray-700 bg-gray-800/50 opacity-60' 
+                : 'border-gray-700 bg-gray-800/80 hover:border-orange-400/50'
+            }
+          `}
+          whileHover={!voted ? { scale: 1.02 } : {}}
+          whileTap={!voted ? { scale: 0.98 } : {}}
+          onClick={() => handleVote('b')}
+        >
+          {showResult && (
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-transparent"
+              initial={{ width: 0 }}
+              animate={{ width: `${percentB}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          )}
+          
+          <div className="relative flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <ChevronRight className="w-5 h-5 text-orange-400" />
+                <span className="text-orange-400 text-sm font-bold uppercase">Side B</span>
+              </div>
+              <p className="text-white font-medium">{room?.arena_option_b || 'Option B'}</p>
+            </div>
+            
+            {showResult && (
+              <motion.div 
+                className="text-2xl font-bold text-orange-400"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                {percentB}%
+              </motion.div>
+            )}
+          </div>
+          
+          {voted === 'b' && (
+            <motion.div 
+              className="absolute top-2 right-2"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+            >
+              <Zap className="w-5 h-5 text-orange-400 fill-orange-400" />
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Voting instruction */}
+      {!voted && (
+        <motion.p 
+          className="text-center text-gray-500 text-sm mt-6"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          Tap a side to cast your vote
+        </motion.p>
+      )}
+    </div>
+  );
+}
