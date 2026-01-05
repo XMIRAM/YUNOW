@@ -1,0 +1,149 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Users, Flame, Gavel, Laugh, FlaskConical, ShoppingBag, Star } from 'lucide-react';
+
+const DISTRICT_CONFIG = {
+  central: {
+    name: 'Central Square',
+    icon: Star,
+    gradient: 'from-violet-600 via-purple-600 to-indigo-600',
+    glow: 'shadow-violet-500/50',
+    description: 'The heart of the city'
+  },
+  cafe: {
+    name: 'Café District',
+    icon: Flame,
+    gradient: 'from-orange-500 via-amber-500 to-yellow-500',
+    glow: 'shadow-orange-500/50',
+    description: 'Stories & connections'
+  },
+  court: {
+    name: 'The Court',
+    icon: Gavel,
+    gradient: 'from-red-600 via-rose-600 to-pink-600',
+    glow: 'shadow-red-500/50',
+    description: 'Judge & be judged'
+  },
+  meme: {
+    name: 'Meme Street',
+    icon: Laugh,
+    gradient: 'from-green-500 via-emerald-500 to-teal-500',
+    glow: 'shadow-green-500/50',
+    description: 'Quick wit battles'
+  },
+  laboratory: {
+    name: 'The Laboratory',
+    icon: FlaskConical,
+    gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
+    glow: 'shadow-cyan-500/50',
+    description: 'Ideas & experiments'
+  },
+  market: {
+    name: 'Market Square',
+    icon: ShoppingBag,
+    gradient: 'from-pink-500 via-fuchsia-500 to-purple-500',
+    glow: 'shadow-pink-500/50',
+    description: 'Trade & exchange'
+  }
+};
+
+export default function DistrictPortal({ 
+  district, 
+  visitors = 0, 
+  isActive = false,
+  onClick,
+  size = 'md'
+}) {
+  const config = DISTRICT_CONFIG[district] || DISTRICT_CONFIG.central;
+  const Icon = config.icon;
+  
+  const sizes = {
+    sm: 'w-24 h-28',
+    md: 'w-32 h-36',
+    lg: 'w-40 h-44',
+  };
+
+  return (
+    <motion.div
+      className={`
+        ${sizes[size]} cursor-pointer relative group
+      `}
+      whileHover={{ scale: 1.08, y: -5 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+    >
+      {/* Portal Base */}
+      <div className={`
+        absolute inset-0 bg-gradient-to-b ${config.gradient} 
+        rounded-2xl opacity-80 blur-sm group-hover:blur-md transition-all
+        ${config.glow} shadow-lg group-hover:shadow-xl
+      `} />
+      
+      {/* Portal Content */}
+      <div className={`
+        relative h-full bg-gradient-to-b ${config.gradient}
+        rounded-2xl p-3 flex flex-col items-center justify-center
+        border border-white/20 overflow-hidden
+      `}>
+        {/* Animated background pattern */}
+        <motion.div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `radial-gradient(circle at 50% 50%, white 1px, transparent 1px)`,
+            backgroundSize: '8px 8px'
+          }}
+          animate={{ 
+            backgroundPosition: ['0px 0px', '8px 8px']
+          }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        />
+        
+        {/* Icon */}
+        <motion.div
+          animate={isActive ? { 
+            scale: [1, 1.1, 1],
+            rotate: [0, 5, -5, 0]
+          } : {}}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
+          <Icon className="w-8 h-8 text-white drop-shadow-lg" />
+        </motion.div>
+        
+        {/* Name */}
+        <h3 className="text-white font-bold text-center text-sm mt-2 drop-shadow-lg">
+          {config.name}
+        </h3>
+        
+        {/* Description */}
+        <p className="text-white/70 text-[10px] text-center mt-0.5">
+          {config.description}
+        </p>
+        
+        {/* Visitors */}
+        {visitors > 0 && (
+          <motion.div 
+            className="absolute top-2 right-2 flex items-center gap-1 
+                       bg-black/40 px-2 py-0.5 rounded-full"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+          >
+            <Users className="w-3 h-3 text-white" />
+            <span className="text-white text-xs font-medium">{visitors}</span>
+          </motion.div>
+        )}
+        
+        {/* Active indicator */}
+        {isActive && (
+          <motion.div 
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 
+                       w-2 h-2 bg-white rounded-full"
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
+          />
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+export { DISTRICT_CONFIG };
