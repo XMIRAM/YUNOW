@@ -1,0 +1,31 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+
+const AVATAR_STYLES = {
+  avatar_1: { bg: 'from-violet-500 to-purple-600', emoji: '👤' },
+  avatar_2: { bg: 'from-cyan-400 to-blue-500', emoji: '🌊' },
+  avatar_3: { bg: 'from-orange-400 to-red-500', emoji: '🔥' },
+  avatar_4: { bg: 'from-green-400 to-emerald-500', emoji: '🌿' },
+  avatar_5: { bg: 'from-pink-400 to-rose-500', emoji: '💫' },
+  avatar_6: { bg: 'from-yellow-400 to-amber-500', emoji: '⚡' },
+  avatar_7: { bg: 'from-indigo-400 to-blue-600', emoji: '🌙' },
+  avatar_8: { bg: 'from-teal-400 to-cyan-500', emoji: '🌀' },
+};
+
+const FRAMES = {
+  none: '',
+  gold: 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-black',
+  neon: 'ring-2 ring-cyan-400 shadow-lg shadow-cyan-400/50',
+  fire: 'ring-2 ring-orange-500 shadow-lg shadow-orange-500/50',
+};
+
+const AURAS = {
+  none: '',
+  glow: 'after:absolute after:inset-0 after:bg-white/20 after:rounded-full after:animate-ping after:opacity-30',
+  pulse: 'animate-pulse',
+};
+
+export default function AvatarSprite({ 
+  avatarId = 'avatar_1', 
+  size = 'md', 
+  frame = 'none',
