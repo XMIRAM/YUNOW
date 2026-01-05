@@ -1,0 +1,91 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Send, Zap, Image, Smile } from 'lucide-react';
+
+export default function MessageInput({ onSend, placeholder = "Say something...", fuel = 50 }) {
+  const [message, setMessage] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleSend = () => {
+    if (message.trim()) {
+      onSend(message.trim());
+      setMessage('');
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <motion.div 
+      className={`
+        bg-gray-900 border-t border-gray-800 p-4
+        ${isFocused ? 'border-violet-500/50' : ''}
+      `}
+      animate={{ borderColor: isFocused ? 'rgba(139, 92, 246, 0.5)' : 'rgba(31, 41, 55, 1)' }}
+    >
+      {/* Fuel indicator */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+          <span className="text-yellow-400 text-sm font-medium">{fuel}</span>
+          <span className="text-gray-500 text-xs">fuel available</span>
+        </div>
+      </div>
+
+      {/* Input area */}
+      <div className="flex items-end gap-3">
+        <div className="flex-1 bg-gray-800 rounded-2xl p-3">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            rows={1}
+            className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none text-sm"
+            style={{ maxHeight: '100px' }}
+          />
+          
+          {/* Bottom toolbar */}
+          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-700">
+            <motion.button
+              className="p-2 text-gray-500 hover:text-gray-300 transition-colors"
+              whileTap={{ scale: 0.9 }}
+            >
+              <Image className="w-5 h-5" />
+            </motion.button>
+            <motion.button
+              className="p-2 text-gray-500 hover:text-gray-300 transition-colors"
+              whileTap={{ scale: 0.9 }}
+            >
+              <Smile className="w-5 h-5" />
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Send button */}
+        <motion.button
+          className={`
+            w-12 h-12 rounded-full flex items-center justify-center
+            ${message.trim() 
+              ? 'bg-gradient-to-r from-violet-600 to-purple-600' 
+              : 'bg-gray-800'
+            }
+          `}
+          whileHover={message.trim() ? { scale: 1.05 } : {}}
+          whileTap={message.trim() ? { scale: 0.95 } : {}}
+          onClick={handleSend}
+          disabled={!message.trim()}
+        >
+          <Send className={`w-5 h-5 ${message.trim() ? 'text-white' : 'text-gray-600'}`} />
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
