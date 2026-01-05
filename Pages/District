@@ -1,0 +1,172 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { ArrowLeft, Users, Plus, Filter, Flame, Clock, Zap } from 'lucide-react';
+import { DISTRICT_CONFIG } from '@/components/world/DistrictPortal';
+import RoomCard from '@/components/world/RoomCard';
+import AvatarSprite from '@/components/world/AvatarSprite';
+
+// Mock rooms for each district
+const MOCK_DISTRICT_ROOMS = {
+  cafe: [
+    { id: 'c1', title: 'First date disasters - share yours', type: 'standard', current_visitors: 34, description: 'We all have one...', district: 'cafe' },
+    { id: 'c2', title: 'Confessions from 2AM', type: 'confession', current_visitors: 56, district: 'cafe' },
+    { id: 'c3', title: 'Making friends as an adult', type: 'standard', current_visitors: 23, fuel_boost: 5, district: 'cafe' },
+  ],
+  court: [
+    { id: 'ct1', title: 'The Wedding Plus-One Drama', type: 'court', current_visitors: 189, is_featured: true, district: 'court' },
+    { id: 'ct2', title: 'Should I tell my friend their partner cheated?', type: 'court', current_visitors: 145, district: 'court' },
+  ],
+  meme: [
+    { id: 'm1', title: 'Cats vs Dogs: Final Battle', type: 'arena', current_visitors: 567, fuel_boost: 45, district: 'meme' },
+    { id: 'm2', title: 'Caption this image', type: 'poll', current_visitors: 89, district: 'meme' },
+    { id: 'm3', title: '30-min meme sprint', type: 'timer', current_visitors: 34, expires_at: '2024-01-01', district: 'meme' },
+  ],
+  laboratory: [
+    { id: 'l1', title: 'AI will replace 50% of jobs by 2030', type: 'arena', current_visitors: 234, district: 'laboratory' },
+    { id: 'l2', title: 'Brainstorm: App ideas for Gen Z', type: 'standard', current_visitors: 45, fuel_boost: 12, district: 'laboratory' },
+    { id: 'l3', title: 'Solve the cipher', type: 'puzzle', current_visitors: 78, district: 'laboratory' },
+  ],
+  market: [
+    { id: 'mk1', title: 'Trade: Vintage vinyl records', type: 'club', current_visitors: 23, district: 'market' },
+    { id: 'mk2', title: 'How to negotiate salary', type: 'standard', current_visitors: 156, fuel_boost: 20, district: 'market' },
+  ],
+};
+
+export default function District() {
+  const navigate = useNavigate();
+  const urlParams = new URLSearchParams(window.location.search);
+  const area = urlParams.get('area') || 'cafe';
+  
+  const [filter, setFilter] = useState('all');
+  
+  const config = DISTRICT_CONFIG[area] || DISTRICT_CONFIG.cafe;
+  const Icon = config.icon;
+  const rooms = MOCK_DISTRICT_ROOMS[area] || [];
+
+  const filteredRooms = filter === 'all' 
+    ? rooms 
+    : rooms.filter(r => r.type === filter);
+
+  // Mock visitors
+  const mockVisitors = [
+    { avatar_id: 'avatar_1' },
+    { avatar_id: 'avatar_3' },
+    { avatar_id: 'avatar_5' },
+    { avatar_id: 'avatar_2' },
+    { avatar_id: 'avatar_7' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* Header */}
+      <motion.div 
+        className={`bg-gradient-to-b ${config.gradient} pb-8`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <div className="p-4">
+          {/* Back button */}
+          <motion.button
+            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm"
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </motion.button>
+
+          {/* District info */}
+          <div className="flex items-center gap-4">
+            <motion.div 
+              className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+            >
+              <Icon className="w-8 h-8 text-white" />
+            </motion.div>
+            <div>
+              <h1 className="text-white font-black text-2xl">{config.name}</h1>
+              <p className="text-white/70">{config.description}</p>
+            </div>
+          </div>
+
+          {/* Visitors */}
+          <div className="flex items-center gap-3 mt-6">
+            <div className="flex -space-x-2">
+              {mockVisitors.map((v, i) => (
+                <AvatarSprite key={i} avatarId={v.avatar_id} size="sm" />
+              ))}
+            </div>
+            <span className="text-white/80 text-sm">
+              <Users className="w-4 h-4 inline mr-1" />
+              {rooms.reduce((acc, r) => acc + (r.current_visitors || 0), 0)} exploring
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Filters */}
+      <div className="sticky top-0 z-30 bg-black/90 backdrop-blur-lg border-b border-gray-800 p-3">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {['all', 'standard', 'arena', 'court', 'poll', 'timer', 'confession'].map((f) => (
+            <motion.button
+              key={f}
+              className={`
+                px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap
+                ${filter === f 
+                  ? 'bg-white text-black' 
+                  : 'bg-gray-800 text-gray-300'
+                }
+              `}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setFilter(f)}
+            >
+              {f === 'all' ? '🌐 All' : f.charAt(0).toUpperCase() + f.slice(1)}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Rooms Grid */}
+      <div className="p-4 space-y-4">
+        {/* Create Room Button */}
+        <motion.button
+          className="w-full p-4 rounded-2xl border-2 border-dashed border-gray-700 
+                     flex items-center justify-center gap-3 text-gray-400
+                     hover:border-violet-500 hover:text-violet-400 transition-colors"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+        >
+          <Plus className="w-5 h-5" />
+          <span className="font-medium">Create a Room</span>
+          <span className="flex items-center gap-1 text-yellow-400 text-sm">
+            <Zap className="w-3 h-3 fill-yellow-400" />
+            -10
+          </span>
+        </motion.button>
+
+        {/* Room List */}
+        {filteredRooms.map((room, index) => (
+          <motion.div
+            key={room.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Link to={createPageUrl('Room') + `?id=${room.id}`}>
+              <RoomCard room={room} variant={room.is_featured ? 'featured' : 'default'} />
+            </Link>
+          </motion.div>
+        ))}
+
+        {filteredRooms.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No rooms found</p>
+            <p className="text-gray-600 text-sm mt-1">Be the first to create one!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
