@@ -1,0 +1,87 @@
+{
+  "name": "Room",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Room name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "court",
+        "arena",
+        "poll",
+        "timer",
+        "puzzle",
+        "confession",
+        "battle",
+        "club",
+        "stage"
+      ],
+      "default": "standard"
+    },
+    "district": {
+      "type": "string",
+      "enum": [
+        "central",
+        "cafe",
+        "court",
+        "meme",
+        "laboratory",
+        "market"
+      ],
+      "default": "central"
+    },
+    "description": {
+      "type": "string"
+    },
+    "current_visitors": {
+      "type": "number",
+      "default": 0
+    },
+    "fuel_boost": {
+      "type": "number",
+      "default": 0
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "arena_option_a": {
+      "type": "string"
+    },
+    "arena_option_b": {
+      "type": "string"
+    },
+    "arena_votes_a": {
+      "type": "number",
+      "default": 0
+    },
+    "arena_votes_b": {
+      "type": "number",
+      "default": 0
+    },
+    "court_story": {
+      "type": "string"
+    },
+    "court_verdict_guilty": {
+      "type": "number",
+      "default": 0
+    },
+    "court_verdict_innocent": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "district"
+  ]
+}
