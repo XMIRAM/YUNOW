@@ -1,0 +1,138 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Users, Zap, Clock, Swords, Gavel, MessageCircle, Lock, Vote, Puzzle, Mic, Eye } from 'lucide-react';
+import AvatarSprite from './AvatarSprite';
+
+const ROOM_TYPE_CONFIG = {
+  standard: { icon: MessageCircle, color: 'from-slate-600 to-slate-700', label: 'Room' },
+  court: { icon: Gavel, color: 'from-red-600 to-rose-700', label: 'Court' },
+  arena: { icon: Swords, color: 'from-orange-500 to-red-600', label: 'Arena' },
+  poll: { icon: Vote, color: 'from-blue-500 to-indigo-600', label: 'Poll' },
+  timer: { icon: Clock, color: 'from-amber-500 to-orange-600', label: 'Timer' },
+  puzzle: { icon: Puzzle, color: 'from-purple-500 to-violet-600', label: 'Puzzle' },
+  confession: { icon: Eye, color: 'from-gray-700 to-gray-900', label: 'Confess' },
+  battle: { icon: Swords, color: 'from-pink-500 to-rose-600', label: '1v1' },
+  club: { icon: Lock, color: 'from-emerald-500 to-teal-600', label: 'Club' },
+  stage: { icon: Mic, color: 'from-cyan-500 to-blue-600', label: 'Stage' },
+};
+
+export default function RoomCard({ room, onClick, variant = 'default' }) {
+  const config = ROOM_TYPE_CONFIG[room.type] || ROOM_TYPE_CONFIG.standard;
+  const Icon = config.icon;
+  
+  const isCompact = variant === 'compact';
+  const isFeatured = variant === 'featured';
+
+  return (
+    <motion.div
+      className={`
+        relative cursor-pointer overflow-hidden
+        ${isFeatured ? 'rounded-3xl' : 'rounded-2xl'}
+        ${isCompact ? 'h-20' : isFeatured ? 'h-48' : 'h-32'}
+      `}
+      whileHover={{ scale: 1.02, y: -3 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+    >
+      {/* Background */}
+      <div className={`
+        absolute inset-0 bg-gradient-to-br ${config.color}
+        ${isFeatured ? 'opacity-100' : 'opacity-90'}
+      `} />
+      
+      {/* Animated overlay */}
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+      />
+      
+      {/* Sparkle effect for featured */}
+      {isFeatured && (
+        <motion.div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+          }}
+          animate={{ 
+            backgroundPosition: ['0% 0%', '100% 100%']
+          }}
+          transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse' }}
+        />
+      )}
+
+      {/* Content */}
+      <div className="relative h-full p-4 flex flex-col justify-between">
+        {/* Top row */}
+        <div className="flex items-start justify-between">
+          <div className={`
+            flex items-center gap-2 px-2 py-1 rounded-full 
+            bg-white/20 backdrop-blur-sm
+          `}>
+            <Icon className="w-4 h-4 text-white" />
+            <span className="text-white text-xs font-medium">{config.label}</span>
+          </div>
+          
+          {room.fuel_boost > 0 && (
+            <motion.div 
+              className="flex items-center gap-1 bg-yellow-500/30 px-2 py-1 rounded-full"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Zap className="w-3 h-3 text-yellow-300 fill-yellow-300" />
+              <span className="text-yellow-200 text-xs">+{room.fuel_boost}</span>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Title and info */}
+        <div>
+          <h3 className={`
+            text-white font-bold drop-shadow-lg
+            ${isFeatured ? 'text-xl' : isCompact ? 'text-sm' : 'text-base'}
+          `}>
+            {room.title}
+          </h3>
+          
+          {!isCompact && room.description && (
+            <p className="text-white/70 text-xs mt-1 line-clamp-2">
+              {room.description}
+            </p>
+          )}
+
+          {/* Bottom row - visitors */}
+          <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center gap-1.5">
+              <div className="flex -space-x-2">
+                {[...Array(Math.min(room.current_visitors || 0, 3))].map((_, i) => (
+                  <AvatarSprite 
+                    key={i} 
+                    avatarId={`avatar_${(i % 8) + 1}`} 
+                    size="xs"
+                  />
+                ))}
+              </div>
+              {(room.current_visitors || 0) > 0 && (
+                <span className="text-white/80 text-xs">
+                  {room.current_visitors} inside
+                </span>
+              )}
+            </div>
+            
+            {room.expires_at && (
+              <div className="flex items-center gap-1 text-white/60 text-xs">
+                <Clock className="w-3 h-3" />
+                <span>Limited</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Hover glow */}
+      <motion.div 
+        className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors"
+      />
+    </motion.div>
+  );
+}
+
+export { ROOM_TYPE_CONFIG };
