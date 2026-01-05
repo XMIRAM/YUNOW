@@ -1,0 +1,63 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import AvatarPicker from '@/components/onboarding/AvatarPicker';
+import { motion } from 'framer-motion';
+
+export default function Home() {
+  const navigate = useNavigate();
+  const [hasProfile, setHasProfile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const profile = localStorage.getItem('yunow_profile');
+    if (profile) {
+      setHasProfile(true);
+      // Redirect to central square if already has profile
+      navigate(createPageUrl('CentralSquare'));
+    }
+    setIsLoading(false);
+  }, [navigate]);
+
+  const handleOnboardingComplete = ({ avatarId, displayName }) => {
+    const profile = {
+      display_name: displayName,
+      avatar_id: avatarId,
+      fuel: 50,
+      reputation: 0,
+      faction: 'nova',
+      streak_days: 0,
+      subscription: 'free',
+      cosmetics: {
+        frame: 'none',
+        aura: 'none',
+        emotes: [],
+      },
+      is_guest: true,
+    };
+    
+    localStorage.setItem('yunow_profile', JSON.stringify(profile));
+    navigate(createPageUrl('CentralSquare'));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <motion.div 
+          className="text-4xl font-black bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 
+                     bg-clip-text text-transparent"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          YUNOW
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (!hasProfile) {
+    return <AvatarPicker onComplete={handleOnboardingComplete} />;
+  }
+
+  return null;
+}
