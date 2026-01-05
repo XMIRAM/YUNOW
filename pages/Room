@@ -1,0 +1,172 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import RoomHeader from '@/components/room/RoomHeader';
+import MessageBubble from '@/components/room/MessageBubble';
+import MessageInput from '@/components/room/MessageInput';
+import ArenaView from '@/components/room/ArenaView';
+import CourtView from '@/components/room/CourtView';
+import AvatarSprite from '@/components/world/AvatarSprite';
+
+// Mock room data
+const MOCK_ROOMS = {
+  '1': {
+    id: '1',
+    title: 'Is pineapple on pizza a crime?',
+    type: 'arena',
+    description: 'The eternal debate. Pick your side.',
+    current_visitors: 47,
+    fuel_boost: 12,
+    arena_option_a: 'Pineapple belongs on pizza - sweet & savory is perfect',
+    arena_option_b: 'Pineapple on pizza is an abomination',
+    arena_votes_a: 234,
+    arena_votes_b: 289,
+  },
+  'court-1': {
+    id: 'court-1',
+    title: 'The Leftovers Incident',
+    type: 'court',
+    description: 'Judge this roommate situation',
+    current_visitors: 156,
+    court_story: "My roommate ate my clearly labeled leftovers from the fridge. When I confronted them, they said 'food in the fridge is communal' even though we never agreed to that. They refuse to replace it or apologize. Am I wrong for wanting them to replace it?",
+    court_verdict_guilty: 234,
+    court_verdict_innocent: 189,
+  },
+  'arena-1': {
+    id: 'arena-1',
+    title: 'Morning Shower vs Night Shower',
+    type: 'arena',
+    description: 'When do you cleanse?',
+    current_visitors: 312,
+    arena_option_a: 'Morning shower wakes you up fresh and ready for the day',
+    arena_option_b: 'Night shower = you go to bed clean and sleep better',
+    arena_votes_a: 1247,
+    arena_votes_b: 1089,
+  },
+  'c1': {
+    id: 'c1',
+    title: 'First date disasters - share yours',
+    type: 'standard',
+    description: "We all have one... let's hear it",
+    current_visitors: 34,
+  },
+};
+
+// Mock messages
+const MOCK_MESSAGES = [
+  {
+    id: 'm1',
+    author_name: 'NightOwl',
+    author_avatar: 'avatar_3',
+    content: "I once accidentally called my date by my ex's name. In front of their parents. At dinner. 💀",
+    fuel_received: 12,
+    reactions: { fire: 23, skull: 45 },
+  },
+  {
+    id: 'm2',
+    author_name: 'CoffeeAddict',
+    author_avatar: 'avatar_5',
+    content: 'My date showed up 2 hours late, then spent the whole time on their phone. When I asked about it they said they were "live tweeting" our date.',
+    fuel_received: 8,
+    reactions: { skull: 34, spark: 12 },
+  },
+  {
+    id: 'm3',
+    author_name: 'Anonymous',
+    author_avatar: 'avatar_1',
+    content: 'Went on a date to an escape room. We did NOT escape. We also did not have a second date. 🔐',
+    is_anonymous: false,
+    reactions: { fire: 15, heart: 8 },
+  },
+];
+
+// Mock visitors currently in room
+const MOCK_VISITORS = [
+  { avatar_id: 'avatar_1', display_name: 'User1' },
+  { avatar_id: 'avatar_3', display_name: 'NightOwl' },
+  { avatar_id: 'avatar_5', display_name: 'CoffeeAddict' },
+  { avatar_id: 'avatar_2', display_name: 'Wanderer' },
+  { avatar_id: 'avatar_7', display_name: 'StarGazer' },
+  { avatar_id: 'avatar_4', display_name: 'TreeHugger' },
+];
+
+export default function Room() {
+  const navigate = useNavigate();
+  const messagesEndRef = useRef(null);
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomId = urlParams.get('id') || '1';
+  
+  const [room, setRoom] = useState(MOCK_ROOMS[roomId] || MOCK_ROOMS['1']);
+  const [messages, setMessages] = useState(MOCK_MESSAGES);
+  const [profile] = useState(() => {
+    const saved = localStorage.getItem('yunow_profile');
+    return saved ? JSON.parse(saved) : { display_name: 'Guest', avatar_id: 'avatar_1', fuel: 50 };
+  });
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSendMessage = (content) => {
+    const newMessage = {
+      id: `m${Date.now()}`,
+      author_name: profile.display_name,
+      author_avatar: profile.avatar_id,
+      content,
+      reactions: {},
+      fuel_received: 0,
+    };
+    setMessages([...messages, newMessage]);
+  };
+
+  const handleReact = (messageId, reaction) => {
+    setMessages(messages.map(m => {
+      if (m.id === messageId) {
+        return {
+          ...m,
+          reactions: {
+            ...m.reactions,
+            [reaction]: (m.reactions?.[reaction] || 0) + 1
+          }
+        };
+      }
+      return m;
+    }));
+  };
+
+  const handleFuel = (messageId) => {
+    setMessages(messages.map(m => {
+      if (m.id === messageId) {
+        return { ...m, fuel_received: (m.fuel_received || 0) + 1 };
+      }
+      return m;
+    }));
+  };
+
+  const handleVote = (side) => {
+    if (room.type === 'arena') {
+      setRoom({
+        ...room,
+        [`arena_votes_${side}`]: (room[`arena_votes_${side}`] || 0) + 1
+      });
+    }
+  };
+
+  const handleVerdict = (verdict) => {
+    if (room.type === 'court') {
+      const key = verdict === 'guilty' ? 'court_verdict_guilty' : 'court_verdict_innocent';
+      setRoom({
+        ...room,
+        [key]: (room[key] || 0) + 1
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black flex flex-col">
+      {/* Header */}
+ 
