@@ -1,0 +1,153 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { X, Lock, Sparkles, Flame, Crown } from 'lucide-react';
+import AvatarSprite from '../world/AvatarSprite';
+
+const FRAMES = [
+  { id: 'none', name: 'None', unlocked: true },
+  { id: 'gold', name: 'Gold Ring', unlocked: true },
+  { id: 'neon', name: 'Neon Glow', unlocked: false, requiredPlan: 'pro' },
+  { id: 'fire', name: 'Fire Aura', unlocked: false, requiredPlan: 'creator' },
+];
+
+const AURAS = [
+  { id: 'none', name: 'None', unlocked: true },
+  { id: 'glow', name: 'Soft Glow', unlocked: false, requiredPlan: 'pro' },
+  { id: 'pulse', name: 'Pulse', unlocked: false, requiredPlan: 'pro' },
+];
+
+export default function CosmeticsPanel({ 
+  isOpen, 
+  onClose, 
+  avatarId = 'avatar_1',
+  currentFrame = 'none',
+  currentAura = 'none',
+  onSave 
+}) {
+  const [selectedFrame, setSelectedFrame] = useState(currentFrame);
+  const [selectedAura, setSelectedAura] = useState(currentAura);
+
+  if (!isOpen) return null;
+
+  const handleSave = () => {
+    onSave?.({ frame: selectedFrame, aura: selectedAura });
+    onClose();
+  };
+
+  return (
+    <motion.div 
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div 
+        className="bg-gray-900 rounded-t-3xl sm:rounded-3xl w-full max-w-md"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-6 h-6 text-pink-400" />
+            <h2 className="text-white font-bold text-lg">Customize Look</h2>
+          </div>
+          <motion.button
+            className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center"
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+          >
+            <X className="w-5 h-5 text-gray-400" />
+          </motion.button>
+        </div>
+
+        {/* Preview */}
+        <div className="p-6 flex flex-col items-center bg-gradient-to-b from-gray-800/50 to-transparent">
+          <AvatarSprite 
+            avatarId={avatarId} 
+            size="xl" 
+            frame={selectedFrame}
+            aura={selectedAura}
+            isActive
+          />
+          <p className="text-white font-medium mt-3">Preview</p>
+        </div>
+
+        {/* Frames */}
+        <div className="px-4 pb-4">
+          <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+            <Crown className="w-4 h-4 text-yellow-400" />
+            Frames
+          </h3>
+          <div className="flex gap-2 flex-wrap">
+            {FRAMES.map((frame) => (
+              <motion.button
+                key={frame.id}
+                className={`
+                  px-4 py-2 rounded-xl border-2 flex items-center gap-2
+                  ${selectedFrame === frame.id 
+                    ? 'border-violet-500 bg-violet-500/20' 
+                    : 'border-gray-700 bg-gray-800/50'
+                  }
+                  ${!frame.unlocked ? 'opacity-60' : ''}
+                `}
+                whileTap={frame.unlocked ? { scale: 0.95 } : {}}
+                onClick={() => frame.unlocked && setSelectedFrame(frame.id)}
+              >
+                {!frame.unlocked && <Lock className="w-3 h-3 text-gray-500" />}
+                <span className={frame.unlocked ? 'text-white' : 'text-gray-500'}>
+                  {frame.name}
+                </span>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Auras */}
+        <div className="px-4 pb-4">
+          <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+            <Flame className="w-4 h-4 text-orange-400" />
+            Auras
+          </h3>
+          <div className="flex gap-2 flex-wrap">
+            {AURAS.map((aura) => (
+              <motion.button
+                key={aura.id}
+                className={`
+                  px-4 py-2 rounded-xl border-2 flex items-center gap-2
+                  ${selectedAura === aura.id 
+                    ? 'border-violet-500 bg-violet-500/20' 
+                    : 'border-gray-700 bg-gray-800/50'
+                  }
+                  ${!aura.unlocked ? 'opacity-60' : ''}
+                `}
+                whileTap={aura.unlocked ? { scale: 0.95 } : {}}
+                onClick={() => aura.unlocked && setSelectedAura(aura.id)}
+              >
+                {!aura.unlocked && <Lock className="w-3 h-3 text-gray-500" />}
+                <span className={aura.unlocked ? 'text-white' : 'text-gray-500'}>
+                  {aura.name}
+                </span>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="p-4 border-t border-gray-800">
+          <motion.button
+            className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 
+                       rounded-2xl text-white font-bold"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSave}
+          >
+            Save Changes
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
