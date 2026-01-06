@@ -1,134 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>YUNOW</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>YUNOW — Social Web World</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #0b0b0f;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
 
-  <!-- React + ReactDOM -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+/* ====== GLOBAL ====== */
+.hidden { display: none; }
+button {
+  background: none;
+  border: none;
+  color: inherit;
+}
 
-  <!-- Framer Motion -->
-  <script src="https://unpkg.com/framer-motion/dist/framer-motion.umd.js"></script>
+/* ====== ONBOARDING ====== */
+#onboarding {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+.avatars {
+  display: grid;
+  grid-template-columns: repeat(4, 64px);
+  gap: 16px;
+  margin: 24px 0;
+}
 
-  <style>
-    body {
-      background: black;
-      color: white;
-      margin: 0;
-      font-family: system-ui, sans-serif;
-    }
-  </style>
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  opacity: .6;
+}
+
+.avatar.selected {
+  outline: 3px solid #fff;
+  opacity: 1;
+}
+
+/* ====== WORLD ====== */
+#world {
+  min-height: 100vh;
+  position: relative;
+}
+
+.map {
+  padding: 24px;
+}
+
+.square {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  background: radial-gradient(circle at center, #1f1f3a, #0b0b0f);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+/* ====== PORTALS ====== */
+.portal {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #22d3ee, #6366f1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 40px rgba(99,102,241,.5);
+}
+
+.portal span {
+  font-size: 12px;
+  opacity: .8;
+}
+
+#trending { top: 10%; left: 10%; }
+#court { top: 10%; right: 10%; background: linear-gradient(135deg,#f43f5e,#fb7185); }
+#arena { bottom: 15%; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,#facc15,#fb923c); }
+
+/* ====== ROOM ====== */
+#room {
+  position: fixed;
+  inset: 0;
+  background: #050508;
+  display: flex;
+  flex-direction: column;
+}
+
+.room-header {
+  padding: 16px;
+  background: linear-gradient(90deg,#6366f1,#7c3aed);
+}
+
+.messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 12px;
+  background: #1f1f2e;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.room-input {
+  display: flex;
+  padding: 12px;
+  gap: 8px;
+  background: #0b0b0f;
+}
+
+.room-input input {
+  flex: 1;
+  background: #1f1f2e;
+  border: none;
+  padding: 12px;
+  color: #fff;
+  border-radius: 12px;
+}
+
+/* ====== HUD ====== */
+#hud {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  background: #1f1f2e;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+</style>
 </head>
+
 <body>
 
-<div id="root"></div>
+<div id="hud" class="hidden">🔥 Fuel: <span id="fuel">50</span></div>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <h1 style="font-size:40px;">YUNOW</h1>
+  <p>Choose your avatar</p>
+  <div class="avatars">
+    <div class="avatar">👤</div>
+    <div class="avatar">🔥</div>
+    <div class="avatar">🌊</div>
+    <div class="avatar">🌿</div>
+  </div>
+  <button id="enter" disabled>Enter the City</button>
+</div>
+
+<!-- WORLD -->
+<div id="world" class="hidden">
+  <div class="map">
+    <div class="square">
+      <div class="portal" id="trending">Trending<br><span>People inside</span></div>
+      <div class="portal" id="court">Court<br><span>24h verdict</span></div>
+      <div class="portal" id="arena">Arena<br><span>Vote battle</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROOM -->
+<div id="room" class="hidden">
+  <div class="room-header">
+    <button onclick="exitRoom()">← Exit Room</button>
+  </div>
+  <div class="messages" id="messages"></div>
+  <div class="room-input">
+    <input id="msg" placeholder="Speak inside this place..." />
+    <button onclick="send()">🔥</button>
+  </div>
+</div>
 
 <script>
-const { useState } = React;
-const { motion, AnimatePresence } = window["framer-motion"];
+let selected = null;
+let fuel = 50;
 
-/* =====================
-   AVATARS
-===================== */
+document.querySelectorAll('.avatar').forEach(a=>{
+  a.onclick=()=>{
+    document.querySelectorAll('.avatar').forEach(x=>x.classList.remove('selected'));
+    a.classList.add('selected');
+    selected = true;
+    document.getElementById('enter').disabled = false;
+  }
+});
 
-const AVATARS = {
-  avatar_1: "👤",
-  avatar_2: "🔥",
-  avatar_3: "🌊",
-  avatar_4: "🌿"
+document.getElementById('enter').onclick=()=>{
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('world').classList.remove('hidden');
+  document.getElementById('hud').classList.remove('hidden');
 };
 
-function Avatar({ id, size = "text-3xl" }) {
-  return (
-    React.createElement("div", {
-      className: "w-16 h-16 rounded-full bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center " + size
-    }, AVATARS[id])
-  );
+document.querySelectorAll('.portal').forEach(p=>{
+  p.onclick=()=>enterRoom(p.id);
+});
+
+function enterRoom(type){
+  document.getElementById('world').classList.add('hidden');
+  document.getElementById('room').classList.remove('hidden');
+  document.getElementById('messages').innerHTML =
+    '<div class="message">You entered a '+type+' room.</div>';
 }
 
-/* =====================
-   ONBOARDING
-===================== */
-
-function Onboarding({ onDone }) {
-  const [avatar, setAvatar] = useState(null);
-  const [name, setName] = useState("");
-
-  return React.createElement("div", { className: "min-h-screen flex flex-col items-center justify-center p-6" },
-    React.createElement("h1", {
-      className: "text-4xl font-black mb-8 bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent"
-    }, "YUNOW"),
-
-    !avatar
-      ? React.createElement("div", { className: "grid grid-cols-2 gap-4" },
-          Object.keys(AVATARS).map(id =>
-            React.createElement("button", {
-              key: id,
-              onClick: () => setAvatar(id),
-              className: "bg-gray-800 p-4 rounded-xl"
-            }, React.createElement(Avatar, { id }))
-          )
-        )
-      : React.createElement("div", { className: "w-full max-w-sm" },
-          React.createElement(Avatar, { id: avatar }),
-          React.createElement("input", {
-            className: "mt-6 w-full p-4 rounded-xl bg-gray-800",
-            placeholder: "Your name",
-            value: name,
-            onChange: e => setName(e.target.value)
-          }),
-          React.createElement("button", {
-            className: "mt-4 w-full bg-violet-600 py-4 rounded-xl font-bold",
-            disabled: !name,
-            onClick: () => onDone({ avatar, name })
-          }, "Enter")
-        )
-  );
+function exitRoom(){
+  document.getElementById('room').classList.add('hidden');
+  document.getElementById('world').classList.remove('hidden');
 }
 
-/* =====================
-   MAIN APP
-===================== */
-
-function App() {
-  const [user, setUser] = useState(null);
-
-  if (!user) {
-    return React.createElement(Onboarding, { onDone: setUser });
-  }
-
-  return React.createElement("div", { className: "min-h-screen p-6" },
-    React.createElement("div", { className: "flex items-center gap-4 mb-8" },
-      React.createElement(Avatar, { id: user.avatar }),
-      React.createElement("h2", { className: "text-2xl font-bold" }, "Welcome, " + user.name)
-    ),
-
-    React.createElement("div", { className: "grid grid-cols-2 gap-4" },
-      ["Central", "Cafe", "Court", "Market"].map(name =>
-        React.createElement("div", {
-          key: name,
-          className: "bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-2xl text-center font-bold"
-        }, name)
-      )
-    )
-  );
+function send(){
+  const input = document.getElementById('msg');
+  if(!input.value) return;
+  fuel--;
+  document.getElementById('fuel').textContent = fuel;
+  document.getElementById('messages').innerHTML +=
+    '<div class="message">'+input.value+'</div>';
+  input.value='';
 }
-
-/* =====================
-   RENDER
-===================== */
-
-ReactDOM.createRoot(document.getElementById("root"))
-  .render(React.createElement(App));
-
 </script>
 
 </body>
